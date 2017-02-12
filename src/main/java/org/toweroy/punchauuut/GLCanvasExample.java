@@ -22,7 +22,6 @@ import static com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
 import static com.jogamp.opengl.GL.GL_LEQUAL;
-import static com.jogamp.opengl.GL.GL_LINEAR;
 import static com.jogamp.opengl.GL.GL_NEAREST;
 import static com.jogamp.opengl.GL.GL_NICEST;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
@@ -56,6 +55,9 @@ public class GLCanvasExample extends GLCanvas implements GLEventListener {
     // top, bottom, left and right coordinates.
     private float textureTop, textureBottom, textureLeft, textureRight;
     private float gloveTop, gloveBottom, gloveLeft, gloveRight;
+    // Setup OpenGL Graphics Renderer
+    private GLU glu;  // for the GL Utility
+    private Puncher puncher;
 
     /**
      * The entry main() method to setup the top-level container and animator
@@ -96,10 +98,6 @@ public class GLCanvasExample extends GLCanvas implements GLEventListener {
         });
     }
 
-    // Setup OpenGL Graphics Renderer
-
-    private GLU glu;  // for the GL Utility
-
     /**
      * Constructor to setup the GUI for this Component
      */
@@ -122,7 +120,8 @@ public class GLCanvasExample extends GLCanvas implements GLEventListener {
         gl.glDepthFunc(GL_LEQUAL);  // the type of depth test to do
         gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best perspective correction
         gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out lighting
-
+        puncher = new Puncher();
+        drawable.addGLEventListener(puncher);
         // ----- Your OpenGL initialization code here -----
 
         // Load texture from image
@@ -209,18 +208,34 @@ public class GLCanvasExample extends GLCanvas implements GLEventListener {
         gl.glEnd();
     }
 
+    private void drawRectangle(GL2 gl) {
+        final float transformX = 8;
+        final float transformY = 11;
+
+        final float moveX = -0.4f;
+        final float moveY = -0.24f;
+
+        gl.glVertex3f((-1.0f / transformX) + moveX, (-1.0f / transformY) + moveY, 1.0f); // bottom-left of the texture and quad
+        gl.glVertex3f((1.0f / transformX) + moveX, (-1.0f/ transformY) + moveY, 1.0f);  // bottom-right of the texture and quad
+        gl.glVertex3f((1.0f/ transformX) + moveX, (1.0f/ transformY) + moveY, 1.0f);   // top-right of the texture and quad
+        gl.glVertex3f((-1.0f/ transformX) + moveX, (1.0f/ transformY) + moveY, 1.0f);  // top-left of the texture and quad
+    }
+
     private void drawGlove(GL2 gl) {
         gl.glTexCoord2f(gloveLeft, gloveBottom);
-        gl.glVertex3f(-1.0f, -1.0f, 1.0f); // bottom-left of the texture and quad
+        final float transformX = 8;
+        final float transformY = 11;
+
+        final float moveX = -0.4f;
+        final float moveY = -0.24f;
+
+        gl.glVertex3f((-1.0f / transformX) + moveX, (-1.0f / transformY) + moveY, 1.0f); // bottom-left of the texture and quad
         gl.glTexCoord2f(gloveRight, gloveBottom);
-//        gl.glVertex3f(0.5f, -1.0f, 1.0f);  // bottom-right of the texture and quad
-        gl.glVertex3f(1.0f, -1.0f, 1.0f);  // bottom-right of the texture and quad
+        gl.glVertex3f((1.0f / transformX) + moveX, (-1.0f/ transformY) + moveY, 1.0f);  // bottom-right of the texture and quad
         gl.glTexCoord2f(gloveRight, gloveTop);
-//        gl.glVertex3f(0.5f, 0.2f, 1.0f);   // top-right of the texture and quad
-        gl.glVertex3f(1.0f, 1.0f, 1.0f);   // top-right of the texture and quad
+        gl.glVertex3f((1.0f/ transformX) + moveX, (1.0f/ transformY) + moveY, 1.0f);   // top-right of the texture and quad
         gl.glTexCoord2f(gloveLeft, gloveTop);
-//        gl.glVertex3f(-1.0f, 0.2f, 1.0f);  // top-left of the texture and quad
-        gl.glVertex3f(-1.0f, 1.0f, 1.0f);  // top-left of the texture and quad
+        gl.glVertex3f((-1.0f/ transformX) + moveX, (1.0f/ transformY) + moveY, 1.0f);  // top-left of the texture and quad
     }
 
     private void drawMainScreen(GL2 gl) {
