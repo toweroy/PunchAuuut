@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -32,7 +34,9 @@ public class GlassJoe implements Drawable {
     private static final Coordinates GLASS_JOE_1X4 = new Coordinates(135, 200, 175, 329);
     private static final Coordinates GLASS_JOE_1X11 = new Coordinates(420, 200, 460, 329);
 
+    private List<AnimationListener> animationListeners = new ArrayList<>();
     private Texture glassJoeTexture;
+    private TextureCoords glassJoeCoords;
 
     private float glassJoeTop, glassJoeBottom, glassJoeLeft, glassJoeRight;
     private float glassJoeX = 0.7f;
@@ -40,6 +44,10 @@ public class GlassJoe implements Drawable {
     private boolean initialized;
 
     public GlassJoe() {
+    }
+
+    public void addAnimationListener(AnimationListener animationListener) {
+        animationListeners.add(animationListener);
     }
 
     public void bindTextures(GL2 gl) {
@@ -71,7 +79,7 @@ public class GlassJoe implements Drawable {
     }
 
     private void getSubImage(Coordinates coordinates) {
-        TextureCoords glassJoeCoords = glassJoeTexture.getSubImageTexCoords(
+        glassJoeCoords = glassJoeTexture.getSubImageTexCoords(
                 coordinates.getX1(),
                 coordinates.getY1(),
                 coordinates.getX2(),
@@ -154,9 +162,15 @@ public class GlassJoe implements Drawable {
                 }
 
                 getSubImage(GLASS_JOE_1X11);
+                animIntroDone();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void animIntroDone() {
+        animationListeners.forEach(AnimationListener::end);
+        animationListeners.clear();
     }
 }

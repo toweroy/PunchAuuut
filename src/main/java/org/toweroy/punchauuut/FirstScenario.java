@@ -39,6 +39,7 @@ public class FirstScenario implements Drawable, KeyListener {
         this.canvas = canvas;
         canvas.addKeyListener(this);
         canvas.addKeyListener(littleMac);
+        glassJoe.addAnimationListener(littleMac);
     }
 
     public void init(GL2 gl) {

@@ -21,7 +21,7 @@ import static com.jogamp.opengl.GL2ES3.GL_QUADS;
 /**
  * Created by richardtolman on 4/30/17.
  */
-public class LittleMac implements Drawable, KeyListener {
+public class LittleMac implements Drawable, KeyListener, AnimationListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(LittleMac.class);
     private static final String LITTLE_MAC_IMAGE_PATH = "images/little_mac.png";
@@ -33,13 +33,16 @@ public class LittleMac implements Drawable, KeyListener {
     private static final Coordinates LITTLE_MAC_3X5 = new Coordinates(205, 1739, 235, 1840);
 
     private Texture littleMacTexture;
+    private TextureCoords littleMacCoords;
 
     private float littleMacTop, littleMacBottom, littleMacLeft, littleMacRight;
     private float littleMacX = 0.0f;
     private float littleMacY = -0.8f;
     private boolean initialized;
+    private boolean readyToPunch;
 
     public LittleMac() {
+
     }
 
     public void bindTextures(GL2 gl) {
@@ -66,20 +69,20 @@ public class LittleMac implements Drawable, KeyListener {
 
         littleMacTexture = TextureIO.newTexture(glassJoeTextureData);
 
-        getSubImage(LITTLE_MAC_3X3);
+        getSubImage(LITTLE_MAC_2X2);
     }
 
     private void getSubImage(Coordinates coordinates) {
-        TextureCoords glassJoeCoords = littleMacTexture.getSubImageTexCoords(
+        littleMacCoords = littleMacTexture.getSubImageTexCoords(
                 coordinates.getX1(),
                 coordinates.getY1(),
                 coordinates.getX2(),
                 coordinates.getY2());
 
-        littleMacTop = glassJoeCoords.top();
-        littleMacBottom = glassJoeCoords.bottom();
-        littleMacLeft = glassJoeCoords.left();
-        littleMacRight = glassJoeCoords.right();
+        littleMacTop = littleMacCoords.top();
+        littleMacBottom = littleMacCoords.bottom();
+        littleMacLeft = littleMacCoords.left();
+        littleMacRight = littleMacCoords.right();
     }
 
     public void draw(GL2 gl) {
@@ -118,12 +121,20 @@ public class LittleMac implements Drawable, KeyListener {
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT:
-                leftPunch();
-                LOG.debug("Pressed LEFT (%s)", e.getKeyChar());
+                if (readyToPunch) {
+                    LOG.debug("Punching LEFT");
+                    leftPunch();
+                } else {
+                    LOG.debug("Not ready to punch LEFT");
+                }
                 break;
             case KeyEvent.VK_RIGHT:
-                rightPunch();
-                LOG.debug("Pressed RIGHT (%s)", e.getKeyChar());
+                if (readyToPunch) {
+                    LOG.debug("Punching RIGHT");
+                    rightPunch();
+                } else {
+                    LOG.debug("Not ready to punch RIGHT");
+                }
                 break;
             default:
                 break;
@@ -144,6 +155,11 @@ public class LittleMac implements Drawable, KeyListener {
         PunchAnimation animation = new PunchAnimation(LITTLE_MAC_3X3, LITTLE_MAC_3X5);
         Thread punch = new Thread(animation);
         punch.start();
+    }
+
+    @Override
+    public void end() {
+        readyToPunch = true;
     }
 
     public class PunchAnimation implements Runnable {
