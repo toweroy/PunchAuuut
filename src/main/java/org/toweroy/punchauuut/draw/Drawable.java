@@ -1,4 +1,4 @@
-package org.toweroy.punchauuut;
+package org.toweroy.punchauuut.draw;
 
 import com.jogamp.opengl.GL2;
 

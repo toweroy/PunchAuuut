@@ -1,4 +1,4 @@
-package org.toweroy.punchauuut;
+package org.toweroy.punchauuut.stages;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLException;
@@ -8,6 +8,8 @@ import com.jogamp.opengl.util.texture.TextureIO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.toweroy.punchauuut.draw.Drawable;
+import org.toweroy.punchauuut.GLCanvasMain;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -18,7 +20,7 @@ import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
 import static com.jogamp.opengl.GL2ES3.GL_QUADS;
-import static org.toweroy.punchauuut.Constants.PNG_IMAGE_FILE_TYPE;
+import static org.toweroy.punchauuut.util.Constants.PNG_IMAGE_FILE_TYPE;
 
 /**
  * Created by richardtolman on 4/30/17.
@@ -149,7 +151,7 @@ public class TitleScreen implements Drawable, KeyListener {
                 LOG.debug("Pressed SHIFT (%s)", e.getKeyChar());
                 break;
             case KeyEvent.VK_ENTER:
-                canvas.setCurrentScenario(new FirstScenario(canvas));
+                canvas.setCurrentScenario(new GlassJoeStage(canvas));
             default:
                 break;
         }

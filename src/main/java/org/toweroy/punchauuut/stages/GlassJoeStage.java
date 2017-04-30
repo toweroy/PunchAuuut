@@ -1,4 +1,4 @@
-package org.toweroy.punchauuut;
+package org.toweroy.punchauuut.stages;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLException;
@@ -8,6 +8,10 @@ import com.jogamp.opengl.util.texture.TextureIO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.toweroy.punchauuut.draw.Drawable;
+import org.toweroy.punchauuut.GLCanvasMain;
+import org.toweroy.punchauuut.characters.GlassJoe;
+import org.toweroy.punchauuut.characters.LittleMac;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -18,14 +22,14 @@ import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
 import static com.jogamp.opengl.GL2ES3.GL_QUADS;
-import static org.toweroy.punchauuut.Constants.PNG_IMAGE_FILE_TYPE;
+import static org.toweroy.punchauuut.util.Constants.PNG_IMAGE_FILE_TYPE;
 
 /**
  * Created by richardtolman on 4/30/17.
  */
-public class FirstScenario implements Drawable, KeyListener {
+public class GlassJoeStage implements Drawable, KeyListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FirstScenario.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GlassJoeStage.class);
     private static final String BOXING_RINGS_IMAGE_PATH = "images/boxing_rings.png";
 
     private GlassJoe glassJoe = new GlassJoe();
@@ -35,7 +39,7 @@ public class FirstScenario implements Drawable, KeyListener {
 
     private float textureTop, textureBottom, textureLeft, textureRight;
 
-    public FirstScenario(GLCanvasMain canvas) {
+    public GlassJoeStage(GLCanvasMain canvas) {
         this.canvas = canvas;
         canvas.addKeyListener(this);
         canvas.addKeyListener(littleMac);

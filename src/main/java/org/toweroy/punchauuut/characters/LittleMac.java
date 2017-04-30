@@ -1,4 +1,4 @@
-package org.toweroy.punchauuut;
+package org.toweroy.punchauuut.characters;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
@@ -10,6 +10,9 @@ import com.jogamp.opengl.util.texture.TextureIO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.toweroy.punchauuut.animation.AnimationListener;
+import org.toweroy.punchauuut.draw.Drawable;
+import org.toweroy.punchauuut.util.Coordinates;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;

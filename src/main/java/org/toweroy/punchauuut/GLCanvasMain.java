@@ -9,6 +9,9 @@ import com.jogamp.opengl.util.FPSAnimator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.toweroy.punchauuut.draw.Drawable;
+import org.toweroy.punchauuut.draw.Puncher;
+import org.toweroy.punchauuut.stages.GlassJoeStage;
 
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -112,7 +115,7 @@ public class GLCanvasMain extends GLCanvas implements GLEventListener {
         drawable.addGLEventListener(puncher);
         // ----- Your OpenGL initialization code here -----
         // Initialize title screen
-        currentScenario = new FirstScenario(canvas);
+        currentScenario = new GlassJoeStage(canvas);
 //        currentScenario.init(gl);
     }
 
