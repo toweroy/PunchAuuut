@@ -17,12 +17,13 @@ import static com.jogamp.opengl.GL.GL_NEAREST;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL2ES3.GL_QUADS;
 import static org.toweroy.punchauuut.Constants.PNG_IMAGE_FILE_TYPE;
 
 /**
  * Created by richardtolman on 4/30/17.
  */
-public class TitleScreen implements Scenario, KeyListener {
+public class TitleScreen implements Drawable, KeyListener {
     private static final Logger LOG = LoggerFactory.getLogger(GLCanvasMain.class);
     private static final String TITLE_SCREEN_IMAGE_PATH = "images/title_screen.png";
     // Objects
@@ -68,6 +69,8 @@ public class TitleScreen implements Scenario, KeyListener {
             gloveLeft = gloveCoords.left();
             textureRight = textureCoords.right();
             gloveRight = gloveCoords.right();
+
+            bindTextures(gl);
         } catch (GLException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -84,6 +87,7 @@ public class TitleScreen implements Scenario, KeyListener {
     }
 
     public void draw(GL2 gl) {
+        gl.glBegin(GL_QUADS);
         // Front Face
         drawMainScreen(gl);
         // "Erase" main screen gloves
@@ -93,6 +97,8 @@ public class TitleScreen implements Scenario, KeyListener {
         drawGlove(gl, false, -0.4f, leftGloveY);
         // Right glove
         drawGlove(gl, true, 0.4f, rightGloveY);
+
+        gl.glEnd();
     }
 
     private void drawRectangle(GL2 gl, final float moveX, final float moveY) {

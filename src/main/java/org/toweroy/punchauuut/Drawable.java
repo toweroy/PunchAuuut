@@ -7,7 +7,7 @@ import java.security.Key;
 /**
  * Created by richardtolman on 4/30/17.
  */
-public interface Scenario {
+public interface Drawable {
 
     void bindTextures(GL2 gl);
 

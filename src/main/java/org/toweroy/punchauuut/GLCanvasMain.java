@@ -6,7 +6,6 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.FPSAnimator;
-import com.jogamp.opengl.util.texture.Texture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,6 @@ import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
 import static com.jogamp.opengl.GL.GL_LEQUAL;
 import static com.jogamp.opengl.GL.GL_NICEST;
 import static com.jogamp.opengl.GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT;
-import static com.jogamp.opengl.GL2ES3.GL_QUADS;
 import static com.jogamp.opengl.fixedfunc.GLLightingFunc.GL_SMOOTH;
 import static com.jogamp.opengl.fixedfunc.GLMatrixFunc.GL_MODELVIEW;
 import static com.jogamp.opengl.fixedfunc.GLMatrixFunc.GL_PROJECTION;
@@ -49,7 +47,7 @@ public class GLCanvasMain extends GLCanvas implements GLEventListener {
     // Setup OpenGL Graphics Renderer
     private GLU glu;  // for the GL Utility
     private Puncher puncher;
-    public Scenario currentScenario;
+    public Drawable currentScenario;
 
     /**
      * The entry main() method to setup the top-level container and animator
@@ -114,7 +112,7 @@ public class GLCanvasMain extends GLCanvas implements GLEventListener {
         drawable.addGLEventListener(puncher);
         // ----- Your OpenGL initialization code here -----
         // Initialize title screen
-        currentScenario = new TitleScreen(canvas);
+        currentScenario = new FirstScenario(canvas);
 //        currentScenario.init(gl);
     }
 
@@ -155,13 +153,7 @@ public class GLCanvasMain extends GLCanvas implements GLEventListener {
         gl.glTranslatef(0.0f, 0.0f, -4.0f); // translate into the screen
 
         currentScenario.init(gl);
-        currentScenario.bindTextures(gl);
-
-        gl.glBegin(GL_QUADS);
-
         currentScenario.draw(gl);
-
-        gl.glEnd();
     }
 
     /**
@@ -170,7 +162,7 @@ public class GLCanvasMain extends GLCanvas implements GLEventListener {
     public void dispose(GLAutoDrawable drawable) {
     }
 
-    public void setCurrentScenario(Scenario scenario) {
+    public void setCurrentScenario(Drawable scenario) {
         canvas.currentScenario = scenario;
     }
 }

@@ -1,9 +1,12 @@
 package org.toweroy.punchauuut;
 
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLException;
+import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
+import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 import org.slf4j.Logger;
@@ -13,22 +16,26 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
 
+import static com.jogamp.opengl.GL.GL_BLEND;
 import static com.jogamp.opengl.GL.GL_NEAREST;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL2ES3.GL_QUADS;
 import static org.toweroy.punchauuut.Constants.PNG_IMAGE_FILE_TYPE;
 
 /**
  * Created by richardtolman on 4/30/17.
  */
-public class FirstScenario implements Scenario, KeyListener {
-    private static final Logger LOG = LoggerFactory.getLogger(GLCanvasMain.class);
+public class FirstScenario implements Drawable, KeyListener {
+
+    private static final Logger LOG = LoggerFactory.getLogger(FirstScenario.class);
     private static final String BOXING_RINGS_IMAGE_PATH = "images/boxing_rings.png";
-    // Objects
-    private Texture boxingRingsTexture;
+
+    private GlassJoe glassJoe = new GlassJoe();
     private GLCanvasMain canvas;
-    // Primitives
+    private Texture boxingRingsTexture;
+
     private float textureTop, textureBottom, textureLeft, textureRight;
 
     public FirstScenario(GLCanvasMain canvas) {
@@ -37,16 +44,12 @@ public class FirstScenario implements Scenario, KeyListener {
     }
 
     public void init(GL2 gl) {
-        // Load boxingRingsTexture from image
         try {
-            // Create a OpenGL Texture object from (URL, mipmap, file suffix)
-            // Use URL so that can read from JAR and disk file.
+            // 775 × 454
             boxingRingsTexture = TextureIO.newTexture(
                     getClass().getClassLoader().getResource(BOXING_RINGS_IMAGE_PATH), // relative to project root
                     false, PNG_IMAGE_FILE_TYPE);
-            // 775 × 454
-            // 62,150 lower left
-            // 90,130 top right
+
             gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
@@ -55,6 +58,9 @@ public class FirstScenario implements Scenario, KeyListener {
             textureBottom = textureCoords.bottom();
             textureLeft = textureCoords.left();
             textureRight = textureCoords.right() / 3;
+
+            bindTextures(gl);
+
         } catch (GLException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -63,16 +69,19 @@ public class FirstScenario implements Scenario, KeyListener {
     }
 
     public void bindTextures(GL2 gl) {
-        // Enables this boxingRingsTexture's target in the current GL context's state.
-        boxingRingsTexture.enable(gl);  // same as gl.glEnable(boxingRingsTexture.getTarget());
-        // gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE);
-        // Binds this boxingRingsTexture to the current GL context.
-        boxingRingsTexture.bind(gl);  // same as gl.glBindTexture(boxingRingsTexture.getTarget(), boxingRingsTexture.getTextureObject());
+        boxingRingsTexture.enable(gl);
+        boxingRingsTexture.bind(gl);
     }
 
     public void draw(GL2 gl) {
+        gl.glBegin(GL_QUADS);
         // Front Face
         drawBoxingRing(gl);
+
+        gl.glEnd();
+
+        glassJoe.init(gl);
+        glassJoe.draw(gl);
     }
 
     private void drawRectangle(GL2 gl, final float moveX, final float moveY) {
