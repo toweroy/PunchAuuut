@@ -3,18 +3,17 @@ package org.toweroy.punchauuut;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
-import com.jogamp.opengl.GLException;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.texture.Texture;
-import com.jogamp.opengl.util.texture.TextureCoords;
-import com.jogamp.opengl.util.texture.TextureIO;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 
 import javax.swing.*;
 
@@ -22,11 +21,7 @@ import static com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
 import static com.jogamp.opengl.GL.GL_LEQUAL;
-import static com.jogamp.opengl.GL.GL_NEAREST;
 import static com.jogamp.opengl.GL.GL_NICEST;
-import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
-import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
-import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
 import static com.jogamp.opengl.GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT;
 import static com.jogamp.opengl.GL2ES3.GL_QUADS;
 import static com.jogamp.opengl.fixedfunc.GLLightingFunc.GL_SMOOTH;
@@ -41,23 +36,20 @@ import static com.jogamp.opengl.fixedfunc.GLMatrixFunc.GL_PROJECTION;
  * Example from: http://www3.ntu.edu.sg/home/ehchua/programming/opengl/JOGL2.0.html
  */
 @SuppressWarnings("serial")
-public class GLCanvasExample extends GLCanvas implements GLEventListener {
+public class GLCanvasMain extends GLCanvas implements GLEventListener {
+
+    private static final Logger log = LoggerFactory.getLogger(GLCanvasMain.class);
     // Define constants for the top-level container
     private static String TITLE = "JOGL 2.0 Setup (GLCanvas)";  // window's title
     private static final int CANVAS_WIDTH = 640;  // width of the drawable
     private static final int CANVAS_HEIGHT = 480; // height of the drawable
     private static final int FPS = 60; // animator's target frames per second
 
-    private Texture texture;
-    private String textureFileName = "images/title_screen.png";
-    private String textureFileType = ".png";
-    // Texture image flips vertically. Shall use TextureCoords class to retrieve the
-    // top, bottom, left and right coordinates.
-    private float textureTop, textureBottom, textureLeft, textureRight;
-    private float gloveTop, gloveBottom, gloveLeft, gloveRight;
+    private static GLCanvasMain canvas;
     // Setup OpenGL Graphics Renderer
     private GLU glu;  // for the GL Utility
     private Puncher puncher;
+    public Scenario currentScenario;
 
     /**
      * The entry main() method to setup the top-level container and animator
@@ -67,12 +59,10 @@ public class GLCanvasExample extends GLCanvas implements GLEventListener {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 // Create the OpenGL rendering canvas
-                GLCanvas canvas = new GLCanvasExample();
+                canvas = new GLCanvasMain();
                 canvas.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
-
                 // Create a animator that drives canvas' display() at the specified FPS.
                 final FPSAnimator animator = new FPSAnimator(canvas, FPS, true);
-
                 // Create the top-level container
                 final JFrame frame = new JFrame(); // Swing's JFrame or AWT's Frame
                 frame.getContentPane().add(canvas);
@@ -101,7 +91,7 @@ public class GLCanvasExample extends GLCanvas implements GLEventListener {
     /**
      * Constructor to setup the GUI for this Component
      */
-    public GLCanvasExample() {
+    public GLCanvasMain() {
         this.addGLEventListener(this);
     }
 
@@ -123,39 +113,9 @@ public class GLCanvasExample extends GLCanvas implements GLEventListener {
         puncher = new Puncher();
         drawable.addGLEventListener(puncher);
         // ----- Your OpenGL initialization code here -----
-
-        // Load texture from image
-        try {
-            // Create a OpenGL Texture object from (URL, mipmap, file suffix)
-            // Use URL so that can read from JAR and disk file.
-            texture = TextureIO.newTexture(
-                    getClass().getClassLoader().getResource(textureFileName), // relative to project root
-                    false, textureFileType);
-            // 256 × 224
-            // 62,150 lower left
-            // 90,130 top right
-            TextureCoords gloveCoords = texture.getSubImageTexCoords(60, 75, 90, 95);
-            // Use linear filter for texture if image is larger than the original texture
-            gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            // Use linear filter for texture if image is smaller than the original texture
-            gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-            // Texture image flips vertically. Shall use TextureCoords class to retrieve
-            // the top, bottom, left and right coordinates, instead of using 0.0f and 1.0f.
-            TextureCoords textureCoords = texture.getImageTexCoords();
-            textureTop = textureCoords.top();
-            gloveTop = gloveCoords.top();
-            textureBottom = textureCoords.bottom();
-            gloveBottom = gloveCoords.bottom();
-            textureLeft = textureCoords.left();
-            gloveLeft = gloveCoords.left();
-            textureRight = textureCoords.right();
-            gloveRight = gloveCoords.right();
-        } catch (GLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Initialize title screen
+        currentScenario = new TitleScreen(canvas);
+//        currentScenario.init(gl);
     }
 
     /**
@@ -193,65 +153,24 @@ public class GLCanvasExample extends GLCanvas implements GLEventListener {
 
         // ----- Your OpenGL rendering code here (Render a white triangle for testing) -----
         gl.glTranslatef(0.0f, 0.0f, -4.0f); // translate into the screen
-        // Enables this texture's target in the current GL context's state.
-        texture.enable(gl);  // same as gl.glEnable(texture.getTarget());
-        // gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE);
-        // Binds this texture to the current GL context.
-        texture.bind(gl);  // same as gl.glBindTexture(texture.getTarget(), texture.getTextureObject());
+
+        currentScenario.init(gl);
+        currentScenario.bindTextures(gl);
 
         gl.glBegin(GL_QUADS);
-        // Front Face
-        drawMainScreen(gl);
-        // Glove
-        drawGlove(gl);
+
+        currentScenario.draw(gl);
 
         gl.glEnd();
-    }
-
-    private void drawRectangle(GL2 gl) {
-        final float transformX = 8;
-        final float transformY = 11;
-
-        final float moveX = -0.4f;
-        final float moveY = -0.24f;
-
-        gl.glVertex3f((-1.0f / transformX) + moveX, (-1.0f / transformY) + moveY, 1.0f); // bottom-left of the texture and quad
-        gl.glVertex3f((1.0f / transformX) + moveX, (-1.0f/ transformY) + moveY, 1.0f);  // bottom-right of the texture and quad
-        gl.glVertex3f((1.0f/ transformX) + moveX, (1.0f/ transformY) + moveY, 1.0f);   // top-right of the texture and quad
-        gl.glVertex3f((-1.0f/ transformX) + moveX, (1.0f/ transformY) + moveY, 1.0f);  // top-left of the texture and quad
-    }
-
-    private void drawGlove(GL2 gl) {
-        gl.glTexCoord2f(gloveLeft, gloveBottom);
-        final float transformX = 8;
-        final float transformY = 11;
-
-        final float moveX = -0.4f;
-        final float moveY = -0.24f;
-
-        gl.glVertex3f((-1.0f / transformX) + moveX, (-1.0f / transformY) + moveY, 1.0f); // bottom-left of the texture and quad
-        gl.glTexCoord2f(gloveRight, gloveBottom);
-        gl.glVertex3f((1.0f / transformX) + moveX, (-1.0f/ transformY) + moveY, 1.0f);  // bottom-right of the texture and quad
-        gl.glTexCoord2f(gloveRight, gloveTop);
-        gl.glVertex3f((1.0f/ transformX) + moveX, (1.0f/ transformY) + moveY, 1.0f);   // top-right of the texture and quad
-        gl.glTexCoord2f(gloveLeft, gloveTop);
-        gl.glVertex3f((-1.0f/ transformX) + moveX, (1.0f/ transformY) + moveY, 1.0f);  // top-left of the texture and quad
-    }
-
-    private void drawMainScreen(GL2 gl) {
-        gl.glTexCoord2f(textureLeft, textureBottom);
-        gl.glVertex3f(-1.0f, -1.0f, 1.0f); // bottom-left of the texture and quad
-        gl.glTexCoord2f(textureRight, textureBottom);
-        gl.glVertex3f(1.0f, -1.0f, 1.0f);  // bottom-right of the texture and quad
-        gl.glTexCoord2f(textureRight, textureTop);
-        gl.glVertex3f(1.0f, 1.0f, 1.0f);   // top-right of the texture and quad
-        gl.glTexCoord2f(textureLeft, textureTop);
-        gl.glVertex3f(-1.0f, 1.0f, 1.0f);  // top-left of the texture and quad
     }
 
     /**
      * Called back before the OpenGL context is destroyed. Release resource such as buffers.
      */
     public void dispose(GLAutoDrawable drawable) {
+    }
+
+    public void setCurrentScenario(Scenario scenario) {
+        canvas.currentScenario = scenario;
     }
 }
