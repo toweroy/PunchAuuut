@@ -1,12 +1,9 @@
 package org.toweroy.punchauuut;
 
-import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLException;
-import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
-import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 import org.slf4j.Logger;
@@ -16,7 +13,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
 
-import static com.jogamp.opengl.GL.GL_BLEND;
 import static com.jogamp.opengl.GL.GL_NEAREST;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
@@ -33,6 +29,7 @@ public class FirstScenario implements Drawable, KeyListener {
     private static final String BOXING_RINGS_IMAGE_PATH = "images/boxing_rings.png";
 
     private GlassJoe glassJoe = new GlassJoe();
+    private LittleMac littleMac = new LittleMac();
     private GLCanvasMain canvas;
     private Texture boxingRingsTexture;
 
@@ -41,6 +38,7 @@ public class FirstScenario implements Drawable, KeyListener {
     public FirstScenario(GLCanvasMain canvas) {
         this.canvas = canvas;
         canvas.addKeyListener(this);
+        canvas.addKeyListener(littleMac);
     }
 
     public void init(GL2 gl) {
@@ -80,8 +78,8 @@ public class FirstScenario implements Drawable, KeyListener {
 
         gl.glEnd();
 
-        glassJoe.init(gl);
         glassJoe.draw(gl);
+        littleMac.draw(gl);
     }
 
     private void drawRectangle(GL2 gl, final float moveX, final float moveY) {
